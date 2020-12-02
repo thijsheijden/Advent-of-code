@@ -10,9 +10,9 @@ import (
 )
 
 type passwordPolicy struct {
-	letter        string
-	minOccurrence int
-	maxOccurrence int
+	letter        byte
+	occurrenceOne int
+	occurrenceTwo int
 }
 
 type password struct {
@@ -34,9 +34,9 @@ func main() {
 		fmt.Sscanf(line, "%s%s%s", &occurrenceString, &policyLetterString, &passwordString)
 
 		// Get the min and max occurrence of the policy letter
-		minMax := strings.Split(occurrenceString, "-")
-		min, err := strconv.Atoi(minMax[0])
-		max, err2 := strconv.Atoi(minMax[1])
+		oneTwo := strings.Split(occurrenceString, "-")
+		one, err := strconv.Atoi(oneTwo[0])
+		two, err2 := strconv.Atoi(oneTwo[1])
 
 		if err != nil || err2 != nil {
 			log.Fatalln(err)
@@ -44,10 +44,11 @@ func main() {
 		}
 
 		// Get the policy letter
-		policyLetter := strings.Split(policyLetterString, ":")[0]
+		policyLetterSplit := strings.Split(policyLetterString, ":")[0]
+		policyLetter := []byte(policyLetterSplit)[0]
 
 		// Create the password objects
-		passPolicy := passwordPolicy{minOccurrence: min, maxOccurrence: max, letter: policyLetter}
+		passPolicy := passwordPolicy{occurrenceOne: one, occurrenceTwo: two, letter: policyLetter}
 		pass := password{policy: passPolicy, password: passwordString}
 
 		// Add to the list of passwords
@@ -57,11 +58,8 @@ func main() {
 	// Go over all passwords and determine how many of them adhere to their password policy
 	var adhereToPasswordPolicy int = 0
 	for _, pass := range passwords {
-		// Count how many times the letter appears in the password
-		count := strings.Count(pass.password, pass.policy.letter)
-
-		// Check if count is no less than minOccurrence and no more than maxOccurrence
-		if count <= pass.policy.maxOccurrence && count >= pass.policy.minOccurrence {
+		// Check if the policy letter does not appear at position one AND two
+		if !(pass.password[pass.policy.occurrenceOne-1] == pass.policy.letter && pass.password[pass.policy.occurrenceTwo-1] == pass.policy.letter) && (pass.password[pass.policy.occurrenceOne-1] == pass.policy.letter || pass.password[pass.policy.occurrenceTwo-1] == pass.policy.letter) {
 			adhereToPasswordPolicy++
 		}
 	}
