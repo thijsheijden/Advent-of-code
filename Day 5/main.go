@@ -5,9 +5,10 @@ import (
 	"os"
 )
 
-var highestSeatId int = 0
+var currentlyOccupiedSeats [1024]int
 
 func main() {
+
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for scanner.Scan() {
@@ -31,10 +32,13 @@ func main() {
 		}
 
 		seatId := minRow*8 + minColumn
-
-		if seatId > highestSeatId {
-			highestSeatId = seatId
+		currentlyOccupiedSeats[seatId] = 1
+	}
+	for i, v := range currentlyOccupiedSeats {
+		if i > 0 && i < len(currentlyOccupiedSeats) {
+			if v == 0 && currentlyOccupiedSeats[i-1] == 1 && currentlyOccupiedSeats[i+1] == 1 {
+				println(i)
+			}
 		}
 	}
-	println(highestSeatId)
 }
