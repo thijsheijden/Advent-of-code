@@ -9,37 +9,42 @@ import (
 
 var totalQuestionsYes int
 
+// List of sets, one set for every person
+var yesQuestionsPerPerson []set.Interface
+
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
-
-	questions := set.New(set.NonThreadSafe)
-	questions.Add('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
-
-	questionsYesInThisGroup := set.New(set.NonThreadSafe)
 
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// Newline, so tally up the number of yes votes
+		// Newline, so look for the number of questions everyone voted yes for
 		if len(line) == 0 {
-			tallyUpVotes(questions, &questionsYesInThisGroup)
-			questionsYesInThisGroup.Clear()
+			tallyUpVotes(yesQuestionsPerPerson)
 		} else {
-			// Line with votes, add them to total pool
+			// Line with votes, add every vote to a new set which we add to the list
+			yesAnswers := set.New(set.NonThreadSafe)
 			for _, c := range line {
-				questionsYesInThisGroup.Add(c)
+				yesAnswers.Add(c)
 			}
+			yesQuestionsPerPerson = append(yesQuestionsPerPerson, yesAnswers)
 		}
 	}
 
-	tallyUpVotes(questions, &questionsYesInThisGroup)
-	questionsYesInThisGroup.Clear()
+	tallyUpVotes(yesQuestionsPerPerson)
 
 	println(totalQuestionsYes)
 }
 
-func tallyUpVotes(q set.Interface, qy *set.Interface) int {
-	questionsNo := set.Difference(q, *qy)
-	totalQuestionsYes += 26 - questionsNo.Size()
-	return totalQuestionsYes
+func tallyUpVotes(qy []set.Interface) {
+	allQuestions := set.New(set.NonThreadSafe)
+	allQuestions.Add('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
+
+	for _, s := range qy {
+		allQuestions = set.Intersection(allQuestions, s)
+	}
+
+	totalQuestionsYes += allQuestions.Size()
+	allQuestions.Clear()
+	yesQuestionsPerPerson = nil
 }
