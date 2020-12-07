@@ -3,12 +3,12 @@ package main
 import (
 	"bufio"
 	"os"
+	"strconv"
 	"strings"
 )
 
 var bags map[string][]string
-var bagsAlreadyFound map[string]int
-var bagsThatCanContainGold int
+var numberOfContainedBags int
 
 func main() {
 	bags = make(map[string][]string)
@@ -33,31 +33,36 @@ func main() {
 		// Split the value into words and only grab the color
 		for i := 0; i < len(values); i++ {
 			words := strings.Fields(values[i])
-			values[i] = words[1] + words[2]
+			values[i] = words[0] + " " + words[1] + words[2]
 		}
 
 		// Add the bags to the map
 		bags[words[0]+words[1]] = values
 	}
 
-	bagsAlreadyFound = make(map[string]int)
-
 	// Go over all bags in the dictionary
-	for k, v := range bags {
-		if containsGold(k, v) {
-			bagsThatCanContainGold++
-		}
+	for _, bag := range bags["shinygold"] {
+		// Determine the number of bags inside each of those bags
+		numberOfContainedBags += containedBags(bag)
 	}
 
-	println(bagsThatCanContainGold)
+	println(numberOfContainedBags)
 }
 
-func containsGold(key string, values []string) bool {
+func containedBags(key string) int {
+
+	var bagsContainedInThisBage int = 0
+
+	words := strings.Fields(key)
+
+	i, _ := strconv.Atoi(words[0])
+
+	bagsContainedInThisBage += i
+
 	// Iterate over the bags in the values and see if they contain 'shiny gold'
-	for _, bag := range values {
-		if bag == "shinygold" || containsGold(bag, bags[bag]) {
-			return true
-		}
+	for _, bag := range bags[words[1]] {
+		bagsContainedInThisBage += i * containedBags(bag)
 	}
-	return false
+
+	return bagsContainedInThisBage
 }
