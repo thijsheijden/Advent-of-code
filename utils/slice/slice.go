@@ -11,3 +11,12 @@ func Max(input []int) int {
 
 	return max
 }
+
+// ColumnToSlice takes a column number and returns a slice containing the values in that column
+func ColumnToSlice(column int, s [][]byte) []byte {
+	newSlice := make([]byte, len(s))
+	for i, r := range s {
+		newSlice[i] = r[column]
+	}
+	return newSlice
+}
